@@ -20,9 +20,9 @@ func NewClient(apiKey string) *Client {
 
 type ImageRemovalRequest struct {
 	ImageURL  string
-	Crop      string
-	Ecom      string
-	GetBase64 string
+	Crop      *string
+	Ecom      *string
+	GetBase64 *string
 }
 
 type ImageRemovalResponse struct {
@@ -46,10 +46,20 @@ func (c *Client) BackgroundRemoval(request ImageRemovalRequest) (*ImageRemovalRe
 
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	_ = writer.WriteField("image_url", request.ImageURL)
-	_ = writer.WriteField("crop", request.Crop)
-	_ = writer.WriteField("ecom", request.Ecom)
-	_ = writer.WriteField("get_base64", request.GetBase64)
+	writer.WriteField("image_url", request.ImageURL)
+
+	if request.Crop != nil {
+		writer.WriteField("crop", *request.Crop)
+	}
+
+	if request.Ecom != nil {
+		writer.WriteField("ecom", *request.Ecom)
+	}
+
+	if request.GetBase64 != nil {
+		writer.WriteField("get_base64", *request.GetBase64)
+	}
+
 	err := writer.Close()
 	if err != nil {
 		return nil, err
