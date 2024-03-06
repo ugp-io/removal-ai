@@ -3,7 +3,6 @@ package removalai
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -45,8 +44,6 @@ func (c *Client) BackgroundRemoval(request ImageRemovalRequest) (*ImageRemovalRe
 
 	url := "https://api.removal.ai/3.0/remove"
 
-	fmt.Println("HERE internal")
-	// Prepare the body of the POST request
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	_ = writer.WriteField("image_url", request.ImageURL)
@@ -58,18 +55,15 @@ func (c *Client) BackgroundRemoval(request ImageRemovalRequest) (*ImageRemovalRe
 		return nil, err
 	}
 
-	// Create a new request using http
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return nil, err
 	}
 
-	// Add the required headers to the request
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("accept", "application/json")
 	req.Header.Set("Rm-Token", c.APIKey)
 
-	// Send the request using a client
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -77,22 +71,15 @@ func (c *Client) BackgroundRemoval(request ImageRemovalRequest) (*ImageRemovalRe
 	}
 	defer resp.Body.Close()
 
-	// Read the response body
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		panic(err)
 	}
 
-	// Unmarshal the JSON response into the ResponseData struct
 	var responseData ImageRemovalResponse
-	var response interface{}
 	if err := json.Unmarshal(responseBody, &responseData); err != nil {
 		return nil, err
 	}
-	if err := json.Unmarshal(responseBody, &response); err != nil {
-		panic(err)
-	}
-	fmt.Println(response)
 
 	return &responseData, nil
 }
